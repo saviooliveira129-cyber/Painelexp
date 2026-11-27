@@ -46,7 +46,7 @@ h1{font:700 2.6rem/1.05 var(--cn);margin:2px 0;text-transform:uppercase}
 .k.f{border-top:3px solid var(--or)}
 .k span{display:block;font:400 .72rem var(--mo);letter-spacing:.08em;color:var(--mu);text-transform:uppercase}
 .k b{display:block;font:700 2.5rem/1.15 var(--cn);font-variant-numeric:tabular-nums}
-.k.g b{color:var(--gold)}input[type=date]{background:var(--card);color:var(--tx);border:1px solid var(--ln);border-radius:20px;padding:7px 12px;font:500 .9rem var(--mo)}
+.k.g b{color:var(--gold)}.k.ok b{color:var(--gr)}.pair{display:grid;grid-template-columns:1fr;gap:16px}@media(min-width:900px){.pair{grid-template-columns:1fr 1fr}}input[type=date]{background:var(--card);color:var(--tx);border:1px solid var(--ln);border-radius:20px;padding:7px 12px;font:500 .9rem var(--mo)}
 .onl{font:500 .75rem var(--mo);color:var(--gr);border:1px solid var(--ln);border-radius:20px;padding:5px 12px}.k.b b{color:#3B8BEB}
 .k small{color:var(--mu);font-size:.8rem}
 section{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:20px;margin-bottom:16px}
@@ -88,7 +88,7 @@ dialog .row{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
 </head>
 <body>
 <div class="wrap" id="app"></div>
-<p style="text-align:center;color:#8D8D86;font:.7rem monospace;margin:0 0 20px">versão 3</p>
+<p style="text-align:center;color:#8D8D86;font:.7rem monospace;margin:0 0 20px">versão 4</p>
 <dialog id="dlg"></dialog>
 <div id="toast" role="status"></div>
 <script>
@@ -117,16 +117,16 @@ function ask(title,o){o=o||{};const F=o.fields||[];return new Promise(res=>{cons
  d.innerHTML=`<form method="dialog"><h3>${title}</h3>${F.map((f,i)=>`<label>${f.label}<input id="dv${i}" type="${f.type||"text"}" autocomplete="${f.type==="password"?"current-password":(f.type==="email"?"username":"off")}"></label>`).join("")}${o.msg?`<p>${o.msg}</p>`:""}<div class="row"><button class="gh" value="no">Cancelar</button><button class="btn" value="ok">OK</button></div></form>`;
  d.onclose=()=>res(d.returnValue==="ok"?F.map((f,i)=>{const v=$("dv"+i).value;return f.type==="password"?v:v.trim()}):null);d.showModal();const i=$("dv0");if(i)i.focus()})}
 function agg(){const C={},G={},T={p:0,v:0,sp:0,sv:0,fp:0,fv:0,lp:0,lv:0,pp:0,pv:0},chs=new Set();
- for(const [t,c,s,k,n,v] of W.rows){chs.add(c);
+ for(const [t,c,s,k,n,v,cf] of W.rows){chs.add(c);
   const a=C[t]||(C[t]={t,p:0,v:0,sp:0,sv:0,fp:0,fv:0,ch:{}}),g=G[c]||(G[c]={c,p:0,v:0,sp:0,sv:0,fp:0,fv:0,lp:0,lv:0,pp:0,pv:0});
-  for(const o of [a,g,T]){o.p+=n;o.v+=v;if(s){o.sp+=n;o.sv+=v}else{o.fp+=n;o.fv+=v;if(o!==a){if(k==="P"){o.pp+=n;o.pv+=v}else{o.lp+=n;o.lv+=v}}}}
+  for(const o of [a,g,T]){o.p+=n;o.v+=v;if(cf===1)o.cv=(o.cv||0)+v;else if(cf===0)o.xv=(o.xv||0)+v;if(s){o.sp+=n;o.sv+=v}else{o.fp+=n;o.fv+=v;if(o!==a){if(k==="P"){o.pp+=n;o.pv+=v}else{o.lp+=n;o.lv+=v}}}}
   a.ch[c]=(a.ch[c]||0)+n}
- return{C:Object.values(C).sort((a,b)=>b.v-a.v),G:Object.values(G).sort((a,b)=>a.c<b.c?-1:1),T,chs:[...chs].sort()}}
+ return{C:Object.values(C).sort((a,b)=>b.v-a.v),G:Object.values(G).sort((a,b)=>a.c<b.c?-1:1),T,chs:[...chs].sort(),hasCf:W.rows.some(r=>r[6]===0||r[6]===1)}}
 function parseGrid(grid){
  const hi=grid.findIndex(r=>{const h=r.map(nm);return h.includes("transportadora")&&h.includes("status")});
  if(hi<0)throw new Error("Não achei as colunas Transportadora e Status.");
  const H=grid[hi].map(nm),ix=f=>H.findIndex(f);
- const I={t:ix(h=>h==="transportadora"),st:ix(h=>h==="status"),sep:ix(h=>h==="separado"),rb:ix(h=>h.startsWith("reabastecimento pendente")),ca:ix(h=>h.startsWith("canal de venda")),v:ix(h=>h.includes("volumes calculado")),ti:ix(h=>h==="titulo")};
+ const I={t:ix(h=>h==="transportadora"),st:ix(h=>h==="status"),sep:ix(h=>h==="separado"),rb:ix(h=>h.startsWith("reabastecimento pendente")),ca:ix(h=>h.startsWith("canal de venda")),v:ix(h=>h.includes("volumes calculado")),ti:ix(h=>h==="titulo"),cf:ix(h=>h==="conferido"||h.startsWith("conferido"))};
  if(I.v<0)I.v=ix(h=>h==="qtde. de volumes");
  const miss=[["Separado",I.sep],["Reabastecimento Pendente",I.rb],["Canal de Venda",I.ca],["Qtde Volumes Calculado",I.v]].filter(x=>x[1]<0).map(x=>x[0]);
  if(miss.length)throw new Error("Faltam colunas: "+miss.join(", ")+".");
@@ -134,7 +134,7 @@ function parseGrid(grid){
  for(const r of grid.slice(hi+1)){const t=String(r[I.t]||"").trim();if(!t)continue;
   const st=String(r[I.st]).trim().toUpperCase(),s=String(r[I.sep]).trim().toUpperCase()==="SIM"?1:0,rb=String(r[I.rb]).trim().toUpperCase()==="SIM",v=num(r[I.v]),c=String(r[I.ca]||"-").trim()||"-";
   let k="";if(!s)k=(st==="GERADA COM CORTE"||(st==="GERADA"&&rb))?"P":"L";
-  const key=[t,c,s,k].join("|"),o=M.get(key)||[t,c,s,k,0,0];o[4]++;o[5]+=v;M.set(key,o);n++;
+  const cf=I.cf>=0?(String(r[I.cf]).trim().toUpperCase()==="SIM"?1:0):undefined,key=[t,c,s,k,cf].join("|"),o=M.get(key)||[t,c,s,k,0,0,cf];o[4]++;o[5]+=v;M.set(key,o);n++;
   if(I.ti>=0){const m=/(\d)\s*°?\s*corte/i.exec(String(r[I.ti]));if(m)src[m[1]]=(src[m[1]]||0)+v}}
  if(!n)throw new Error("Nenhuma linha de dados encontrada.");
  return{rows:[...M.values()],src}}
@@ -154,6 +154,8 @@ function render(){
  <div class="ttl"><h1>${esc(cd.name)}</h1>${ST.ed?`<label class="btn" style="cursor:pointer">Importar planilha<input id="fl" type="file" accept=".xlsx,.xls" hidden></label>`:""}</div>
  <div class="meta" id="meta"></div><div class="kp" id="kp"></div>
  <section><h2>Resumo de expedição por transportadora</h2><div class="sc" id="car"></div></section>
+ <div class="pair"><section><h2>Volumes que faltam conferir</h2><p class="note">Por transportadora (Conferido = NÃO).</p><div class="sc" id="cfx"></div></section>
+ <section><h2>Volumes conferidos</h2><p class="note">Por transportadora (Conferido = SIM).</p><div class="sc" id="cfc"></div></section></div>
  <section><h2>Volumes: separado x falta separar</h2><p class="note">Total do dia conforme os cortes diário${ST.ed?". Digite os volumes; eles são salvos para todos.":"."}</p><div class="dn"><div id="dn"></div><div><ul class="lg" id="lg"></ul><div class="cut" id="cuts"></div></div></div></section>
  <section><h2>Canal de venda por galpão: separado x falta separar</h2><div class="sc" id="gal"></div></section>
  <section><h2>Falta separar: liberado x preso em remanejamento</h2><p class="note">Status GERADA, GERADA COM CORTE e LIBERADA. Preso = GERADA com reabastecimento pendente + GERADA COM CORTE.</p><div class="sc" id="pre"></div></section>
@@ -168,6 +170,8 @@ function draw(full){
   <div class="k b"><span>Pedidos embarcados</span><b>${fmt(fora)}</b><small>${pc(fora,base)} do total · concluído</small></div>
   <div class="k"><span>Já separado</span><b>${fmt(T.sv)}</b><small>${pc(T.sv,base)} do total</small></div>
   <div class="k"><span>Falta separar</span><b>${fmt(falta)}</b><small>${pc(falta,base)} do total</small></div>
+  <div class="k"><span>Falta conferir</span><b>${A.hasCf?fmt(T.xv||0):"—"}</b><small>${A.hasCf?pc(T.xv||0,T.v)+" do total":"reimporte a planilha"}</small></div>
+  <div class="k ok"><span>Conferidos</span><b>${A.hasCf?fmt(T.cv||0):"—"}</b><small>${A.hasCf?pc(T.cv||0,T.v)+" do total":"reimporte a planilha"}</small></div>
   <div class="k g"><span>Preso em remanejamento</span><b>${fmt(T.pv)}</b><small>${pc(T.pv,T.fv)} do que falta (planilha)</small></div>
   <div class="k"><span>Tempo p/ finalizar</span><b>${hmc(L.MX)}</b><small>Galpões em paralelo</small></div>`;
  const sl=[{v:T.sv,c:"#1BA672"},{v:T.fv,c:"#E0592A"},{v:fora,c:"#3B8BEB"}];
@@ -189,6 +193,8 @@ function draw(full){
  $("pre").innerHTML=`<table style="min-width:560px"><tr><th rowspan="2">Canal de venda</th><th colspan="2">Falta separar</th><th colspan="2">Liberado p/ separar</th><th colspan="2">Preso em remanejamento</th><th rowspan="2">% preso (volumes)</th></tr><tr><th>OV</th><th>Volumes</th><th>OV</th><th>Volumes</th><th>OV</th><th>Volumes</th></tr>`+
   A.G.map(g=>`<tr><td>${esc(g.c)}</td><td>${fmt(g.fp)}</td><td>${fmt(g.fv)}</td><td>${fmt(g.lp)}</td><td>${fmt(g.lv)}</td><td class="w">${fmt(g.pp)}</td><td class="w">${fmt(g.pv)}</td><td>${bar(g.pv,g.fv)}</td></tr>`).join("")+
   (A.G.length?`<tr class="t"><td>TOTAL</td><td>${fmt(T.fp)}</td><td>${fmt(T.fv)}</td><td>${fmt(T.lp)}</td><td>${fmt(T.lv)}</td><td>${fmt(T.pp)}</td><td>${fmt(T.pv)}</td><td>${bar(T.pv,T.fv)}</td></tr>`:"")+`</table>`;
+ const cfTab=f=>A.hasCf?`<table style="min-width:340px"><tr><th>Transportadora</th><th>Volumes</th><th>% da transportadora</th></tr>`+A.C.slice().sort((a,b)=>(b[f]||0)-(a[f]||0)).map(r=>`<tr><td>${esc(r.t)}</td><td>${fmt(r[f]||0)}</td><td>${bar(r[f]||0,r.v)}</td></tr>`).join("")+`<tr class="t"><td>TOTAL</td><td>${fmt(T[f]||0)}</td><td>${bar(T[f]||0,T.v)}</td></tr></table>`:`<p style="color:var(--mu);text-align:center;padding:16px 0">Reimporte a planilha do dia para calcular a conferência.</p>`;
+ $("cfx").innerHTML=cfTab("xv");$("cfc").innerHTML=cfTab("cv");
  if(full||!inField()){
   const inp=(a,k,v,mn)=>ST.ed?`<input type="number" min="${mn}" data-${a}="${esc(k)}" value="${v}" aria-label="${a==="p"?"Produtividade":"Colaboradores"} ${esc(k)}">`:fmt(v);
   $("lab").innerHTML=`<table style="min-width:640px"><tr><th>Canal de venda</th><th>Falta separar (volumes)</th><th>Produtividade (vol/h por colaborador)</th><th>Colaboradores</th><th>Capacidade (vol/h)</th><th>Tempo necessário (horas)</th><th>Tempo (HH:MM)</th></tr>`+
